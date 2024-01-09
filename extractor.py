@@ -26,8 +26,8 @@ CHAPTERS = {
         ("onik_015", "Day 15.1"),
         ("onik_015_02", "Day 15.2"),
         ("onik_015_03", "Day 15.3"),
-        ("onik_tips_01", "Tip 1"),
-        ("onik_tips_02", "Tip 2"),
+        ("onik_tips_01", "Tip 1: うちって学年混在？"),
+        ("onik_tips_02", "Tip 2: うちって制服自由？"),
         ("onik_tips_03", "Tip 3"),
         ("onik_tips_04", "Tip 4"),
         ("onik_tips_05", "Tip 5"),
@@ -430,6 +430,7 @@ CHAPTERS = {
 ACTOR_COLOR_RE = re.compile("<.*?</color>")
 COLOR_RE = re.compile("=(.*?)>")
 ACTOR_RE = re.compile(">(.*?)<")
+EXTRA_SECTION_RE = re.compile("GetGlobalFlag\(GCensor\)")
 
 out_dir = "./out/"
 chapter = ""
@@ -462,7 +463,6 @@ def voice_to_html_audio(split_line):
             </audio>""".format(
         src
     )
-
 
 def actor_to_html_color(line):
     return
@@ -544,12 +544,16 @@ if __name__ == "__main__":
             if stripped_line.startswith("OutputLine(NULL,"):  # Text line
                 out_file.write(line_to_html_paragraph(split_line))
 
-            result = ACTOR_COLOR_RE.search(line)
-            if result is not None:
-                out_file.write(color_to_html(result.group(0)))
+            actor = ACTOR_COLOR_RE.search(line)
+            if actor is not None:
+                out_file.write(color_to_html(actor.group(0)))
 
             if extra_flag and stripped_line.startswith("ModPlayVoiceLS"):
                 out_file.write(voice_to_html_audio(split_line))
+
+            extra_section = EXTRA_SECTION_RE.search(line)
+            if extra_section is not None:
+                continue
 
         out_file.write('<a href="./main.html" >All chapters</a>')
         out_file.write("</body>")
